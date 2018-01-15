@@ -1,74 +1,90 @@
 import React, {Component} from 'react'
-import {Text, View, TouchableOpacity} from 'react-native'
+import {Dimensions, Text, View} from 'react-native'
 import ColorButton from '../component/ColorButton.js'
+import styles from '../style/GamePlayStyle.js'
 
 export default class GamePlay extends Component {
 
     state = {
         scores: 0,
         targetInput: [],
-        inputIndex: 0,
-        index : -1,
+        userInputIndex: 0,
+        index: -1,
+        size: 0
     };
 
     _onPressButton = (idInput) => {
-        if (idInput === this.state.targetInput[this.state.inputIndex]) {
-            this.setState({
-                inputIndex: this.state.inputIndex + 1
+        (idInput === this.state.targetInput[this.state.userInputIndex])
+            ? this.setState({
+                userInputIndex: this.state.userInputIndex + 1
             }, () => {
-                if (this.state.inputIndex === this.state.scores + 1) {
-                    this.setState({
-                        scores: this.state.scores + 1
-                    }, () => this.randomTargetInput(0, 4))
-                }
-            })
-        } else {
-            this.props.handler();
-        }
+                this.state.userInputIndex === this.state.scores + 1
+                && this._nextLevel(this.state.scores + 1)
+            }
+            )
+            : this.props.handler(this.state.scores);
     };
 
-    run = (count) => {
+    _animationDemo = (count) => {
         setTimeout(() => {
             this.setState({
-                index : count + 1
+                index: count + 1
             }, () => {
                 setTimeout(() => this.setState({
-                    index : -1
-                }),200);
-                if (count !== this.state.scores) this.run(count+1);
+                    index: -1
+                }), 200);
+                if (count !== this.state.scores) this._animationDemo(count + 1);
             })
         }, 800)
     };
 
-    randomTargetInput = (min, max) => {
+    _randomInt = (min, max) => Math.floor(Math.random() * (max - min) + min);
+
+    _nextLevel = (scores) => {
         this.setState({
-            inputIndex: 0,
-            targetInput: Array.from({length: this.state.scores + 1}, () => Math.floor(Math.random() * (max - min) + min))
-        }, () => this.run(this.state.index))
+            scores,
+            targetInput: this.state.targetInput.concat(this._randomInt(0, 4)),
+            userInputIndex: 0
+        }, () => this._animationDemo(this.state.index))
     };
 
-    componentDidMount(){
-        this.randomTargetInput(0, 4);
+    _getSize = () => {
+        const {width, height} = Dimensions.get("window");
+        this.setState({
+            size: (width > height) ? height * 8 /10 : width *8/10
+        })
+    };
+
+    componentDidMount() {
+        this._nextLevel(0);
     }
 
     render() {
         return (
-            <View>
-                <Text>{this.state.scores}</Text>
-                <ColorButton onPress={() => this._onPressButton(0)}
-                             check={this.state.index!==-1 && this.state.targetInput[this.state.index]===0}
-                             background="red"/>
-                <ColorButton onPress={() => this._onPressButton(1)}
-                             check={this.state.index!==-1 && this.state.targetInput[this.state.index]===1}
-                             background="blue"/>
-                <ColorButton onPress={() => this._onPressButton(2)}
-                             check={this.state.index!==-1 && this.state.targetInput[this.state.index]===2}
-                             background="green"/>
-                <ColorButton onPress={() => this._onPressButton(3)}
-                             check={this.state.index!==-1 && this.state.targetInput[this.state.index]===3}
-                             background="black"/>
+            <View style={styles.container} onLayout={this._getSize}>
+                <View style={styles.header}>
+                    <Text style={styles.header_context_title}>Your Score</Text>
+                    <Text style={styles.header_context_score}>{this.state.scores}</Text>
+                </View>
+                <View style={[styles.contain, {width: this.state.size}]}>
+                    <ColorButton onPress={() => this._onPressButton(0)}
+                                 check={this.state.index !== -1 && this.state.targetInput[this.state.index] === 0}
+                                 background="red"
+                                 size={this.state.size}/>
+                    <ColorButton onPress={() => this._onPressButton(1)}
+                                 check={this.state.index !== -1 && this.state.targetInput[this.state.index] === 1}
+                                 background="blue"
+                                 size={this.state.size}/>
+                    <ColorButton onPress={() => this._onPressButton(2)}
+                                 check={this.state.index !== -1 && this.state.targetInput[this.state.index] === 2}
+                                 background="green"
+                                 size={this.state.size}/>
+                    <ColorButton onPress={() => this._onPressButton(3)}
+                                 check={this.state.index !== -1 && this.state.targetInput[this.state.index] === 3}
+                                 background="black"
+                                 size={this.state.size}/>
+                </View>
             </View>
         )
-
     }
 }

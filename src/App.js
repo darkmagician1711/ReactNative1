@@ -7,27 +7,36 @@
 import React, {Component} from 'react'
 import GamePlay from './container/GamePlay.js'
 import GameOver from './container/GameOver.js'
-const gamePlay = 1;
-const gameOver = 2;
+
+const GAME_STATE = {
+    PLAYING     : 1,
+    GAMEOVER    : 2
+};
 
 export default class App extends Component<{}> {
     constructor(props){
         super(props);
         this.state = {
-            status : gamePlay
+            status : GAME_STATE.PLAYING,
+            scores : 0
         }
     }
 
-    handler() {
+    _changeGameState(status, scores){
         this.setState({
-            status: (this.state.status === gamePlay) ? gameOver : gamePlay
+            status,
+            scores
         })
     };
 
     render() {
         return (
-            (this.state.status === gamePlay) ? <GamePlay handler={this.handler.bind(this)} />
-                                             : <GameOver handler={this.handler.bind(this)}/>
+            (this.state.status === GAME_STATE.PLAYING)
+                ? <GamePlay
+                    handler={(scores) => this._changeGameState(GAME_STATE.GAMEOVER,scores)}/>
+                : <GameOver
+                    handler={() => this._changeGameState(GAME_STATE.PLAYING,0)}
+                    scores={this.state.scores}/>
         )
     }
 }

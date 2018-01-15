@@ -9,11 +9,14 @@ export default class GameOver extends Component{
     render(){
         return(
             <View>
-                <Text>
+                <Text style={{textAlign : "center"}}>
                     You Lose!!
                 </Text>
+                <Text style={{textAlign : "center"}}>
+                    Your scores: {this.props.scores}
+                </Text>
                 <TouchableOpacity onPress={this.props.handler}>
-                    <Text style={{backgroundColor:"red", color:"white"}}>
+                    <Text style={{backgroundColor:"red", color:"white", textAlign: "center"}}>
                         Play Again
                     </Text>
                 </TouchableOpacity>
